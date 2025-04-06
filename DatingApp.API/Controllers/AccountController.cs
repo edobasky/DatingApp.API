@@ -3,6 +3,7 @@ using System.Text;
 using DatingApp.API.Data;
 using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
+using DatingApp.API.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,10 @@ namespace DatingApp.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(DataContext context) : ControllerBase
+    public class AccountController(DataContext context,ITokenService tokenService) : ControllerBase
     {
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await UserExist(registerDto.Username)) return BadRequest("User already exist with username");
             using var hmac = new HMACSHA512(); // Self dispose once class is out of scope
@@ -29,11 +30,11 @@ namespace DatingApp.API.Controllers
             context.AppUsers.Add(user);
             await context.SaveChangesAsync();
 
-            return user;
+            return new UserDto {Username = user.UserName,Token = tokenService.CreateToken(user) };
         }
 
         [HttpPost("login")] 
-        public async Task<ActionResult<AppUser>> Login(LoginDto loginDto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await context.AppUsers
                 .AsNoTracking()
@@ -50,7 +51,7 @@ namespace DatingApp.API.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            return user;
+            return new UserDto { Username = user.UserName, Token = tokenService.CreateToken(user) };
 
         }
 
