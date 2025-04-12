@@ -18,7 +18,8 @@ namespace DatingApp.API.Controllers
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await UserExist(registerDto.Username)) return BadRequest("User already exist with username");
-            using var hmac = new HMACSHA512(); // Self dispose once class is out of scope
+            return Ok(registerDto);
+           /* using var hmac = new HMACSHA512(); // Self dispose once class is out of scope
 
             var user = new AppUser
             {
@@ -30,7 +31,7 @@ namespace DatingApp.API.Controllers
             context.AppUsers.Add(user);
             await context.SaveChangesAsync();
 
-            return new UserDto {Username = user.UserName,Token = tokenService.CreateToken(user) };
+            return new UserDto {Username = user.UserName,Token = tokenService.CreateToken(user) };*/
         }
 
         [HttpPost("login")] 
