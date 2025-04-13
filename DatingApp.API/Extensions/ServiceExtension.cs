@@ -21,6 +21,7 @@ namespace DatingApp.API.Extensions
             services.AddCors();
             services.AddScoped<ITokenService, TokenServiceImp>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return services;
         }
