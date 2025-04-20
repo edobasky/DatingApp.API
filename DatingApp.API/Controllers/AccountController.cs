@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
@@ -12,26 +13,26 @@ namespace DatingApp.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(DataContext context,ITokenService tokenService) : ControllerBase
+    public class AccountController(DataContext context,ITokenService tokenService,IMapper mapper) : ControllerBase
     {
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await UserExist(registerDto.Username)) return BadRequest("User already exist with username");
-            return Ok(registerDto);
-           /* using var hmac = new HMACSHA512(); // Self dispose once class is out of scope
+          
+            using var hmac = new HMACSHA512(); // Self dispose once class is out of scope
 
-            var user = new AppUser
-            {
-                UserName = registerDto.Username,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+            var user = mapper.Map<AppUser>(registerDto);
+
+            user.UserName = registerDto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
+
 
             context.AppUsers.Add(user);
             await context.SaveChangesAsync();
 
-            return new UserDto {Username = user.UserName,Token = tokenService.CreateToken(user) };*/
+            return new UserDto {Username = user.UserName,Token = tokenService.CreateToken(user), knownAs = user.KnownAs };
         }
 
         [HttpPost("login")] 
@@ -56,6 +57,7 @@ namespace DatingApp.API.Controllers
             return new UserDto { 
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
+                knownAs = user.KnownAs,
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
             };
 
