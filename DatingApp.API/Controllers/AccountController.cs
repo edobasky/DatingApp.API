@@ -39,6 +39,7 @@ namespace DatingApp.API.Controllers
         {
             var user = await context.AppUsers
                 .AsNoTracking()
+                .Include(p => p.Photos)
                 .FirstOrDefaultAsync( x => x.UserName.ToLower() == loginDto.Username.ToLower());
 
             if (user == null) return Unauthorized("Inavlid login username");
@@ -52,7 +53,11 @@ namespace DatingApp.API.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            return new UserDto { Username = user.UserName, Token = tokenService.CreateToken(user) };
+            return new UserDto { 
+                Username = user.UserName,
+                Token = tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+            };
 
         }
 
