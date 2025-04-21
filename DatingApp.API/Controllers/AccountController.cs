@@ -4,6 +4,7 @@ using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
+using DatingApp.API.Helpers;
 using DatingApp.API.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DatingApp.API.Controllers
 {
     [Route("api/[controller]")]
+    [ServiceFilter(typeof(LogUserActivity))]
     [ApiController]
     public class AccountController(DataContext context,ITokenService tokenService,IMapper mapper) : ControllerBase
     {
