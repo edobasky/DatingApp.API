@@ -22,10 +22,13 @@ namespace DatingApp.API.Entities
 
         public List<Photo> Photos { get; set; } = [];
 
-        public int GetAge()
-        {
-            return DateOfBirth.CalculateAge();
-        }
+        public List<UserLike> LikedByUsers { get; set; } = [];// users who like this user
+        public List<UserLike> LikedUsers { get; set; } = [];// users who this user likes
+
+        /*   public int GetAge()
+           {
+               return DateOfBirth.CalculateAge();
+           }*/
 
     }
 }
