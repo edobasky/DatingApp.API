@@ -1,5 +1,6 @@
 ﻿using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
+using DatingApp.API.Helpers;
 
 namespace DatingApp.API.Repository
 {
@@ -7,7 +8,7 @@ namespace DatingApp.API.Repository
     {
         Task<UserLike?> GetUserLike(int sourceUserId, int targetUserId); // individual user like
 
-        Task<IEnumerable<MemberDto>> GetUserLikes(string predicate, int userId); // gives option to users they like and that have like them and mutual likes
+        Task<PagedList<MemberDto>> GetUserLikes(LikesParams likesParams); // gives option to users they like and that have like them and mutual likes
         Task<IEnumerable<int>> GetCurrentUserLikeIds(int currentUserId); // users a client have liked
         void DeleteLike(UserLike like);
         void AddLike(UserLike like);

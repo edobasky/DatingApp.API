@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
+using DatingApp.API.Helpers;
 using DatingApp.API.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,35 +35,38 @@ namespace DatingApp.API.Data
             return await context.Likes.FindAsync(sourceUserId,targetUserId);
         }
 
-        public async Task<IEnumerable<MemberDto>> GetUserLikes(string predicate, int userId)
+        public async Task<PagedList<MemberDto>> GetUserLikes(LikesParams likesParams)
         {
             // gives option to users they like and that have like them and mutual likes
             var likes = context.Likes.AsQueryable();
+            IQueryable<MemberDto> query;
 
-            switch (predicate)
+            switch (likesParams.Predicate)
             {
                 case "liked":
-                    return await likes
-                        .Where (x => x.SourceUserId == userId)
-                        .Select (x => x.TargetUser)
-                        .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
-                        .ToListAsync();
+                    query = likes
+                       .Where(x => x.SourceUserId == likesParams.UserId)
+                       .Select(x => x.TargetUser)
+                       .ProjectTo<MemberDto>(mapper.ConfigurationProvider);
+                    break;
                 case "likeBy":
-                    return await likes
-                        .Where(x => x.TargetUserId == userId)
+                    query = likes
+                        .Where(x => x.TargetUserId == likesParams.UserId)
                         .Select(x => x.SourceUser)
-                        .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
-                        .ToListAsync();
+                        .ProjectTo<MemberDto>(mapper.ConfigurationProvider);
+                    break;
                 default:
-                    var likeIds = await GetCurrentUserLikeIds(userId);
+                    var likeIds = await GetCurrentUserLikeIds(likesParams.UserId);
 
-                    return await likes
-                        .Where(x => x.TargetUserId == userId && likeIds.Contains(x.SourceUserId))
+                    query = likes
+                        .Where(x => x.TargetUserId == likesParams.UserId && likeIds.Contains(x.SourceUserId))
                         .Select(x => x.SourceUser)
-                        .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
-                        .ToListAsync();
+                        .ProjectTo<MemberDto>(mapper.ConfigurationProvider);
+                    break;
 
             }
+
+            return await PagedList<MemberDto>.CreateAsync(query, likesParams.PageNumber,likesParams.PageSize);
             
         }
 
