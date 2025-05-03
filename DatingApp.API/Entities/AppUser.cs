@@ -24,6 +24,8 @@ namespace DatingApp.API.Entities
 
         public List<UserLike> LikedByUsers { get; set; } = [];// users who like this user
         public List<UserLike> LikedUsers { get; set; } = [];// users who this user likes
+        public List<Message> MessagesSent { get; set; } = [];
+        public List<Message> MessagesReceived { get; set; } = [];
 
         /*   public int GetAge()
            {
